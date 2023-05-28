@@ -114,7 +114,7 @@ class TodoList:
         except json.JSONDecodeError:
             pass
         
-def print_menu():
+def print_menu() -> None:
     print("===== TODO LIST =====")
     print("1. Dodaj nowe zadanie")
     print("2. Wyświetl zadania z danego dnia tygodnia")
@@ -123,75 +123,111 @@ def print_menu():
     print("5. Aktualizuj zadanie")
     print("6. Zapisz zadania do pliku")
     print("7. Wyjdź z programu")
+
+def wybor_fukcjonalnosci(choice: int, todoInstancja: TodoList) -> bool:
+    """Przyjmuje wybór funkcjonalności i instancje Todo, by wywoływać odpowiednie funkcje"""
     
-def main():
     dni_tyg = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota', 'niedziela']
-    todo = TodoList()
-    todo.load_from_file('zadania.json')
-    while True:
-        print_menu()
-        choice = input("Wybierz opcję: ")
+    if choice == 1:
+        tytul = input("Podaj tytuł zadania: ")
+        opis = input("Podaj opis zadania: ")
+        dzien_tygodnia = input("Podaj dzień tygodnia (opcjonalnie): ").lower()
+        if dzien_tygodnia in dni_tyg:
+            todoInstancja.dodaj_zadanie(tytul, opis, dzien_tygodnia)
+            print("Zadanie dodane.")
+        else: 
+            print("Niepoprawny dzień tygodnia")
 
-        if choice == "1":
-            tytul = input("Podaj tytuł zadania: ")
-            opis = input("Podaj opis zadania: ")
-            dzien_tygodnia = input("Podaj dzień tygodnia (opcjonalnie): ").lower()
-            if dzien_tygodnia in dni_tyg:
-                todo.dodaj_zadanie(tytul, opis, dzien_tygodnia)
-                print("Zadanie dodane.")
-            else: 
-                print("Niepoprawny dzień tygodnia")
-
-        elif choice == "2":
-            dzien_tygodnia = input("Podaj dzień tygodnia, z którego chcesz wyświetlić zadania: ").lower()
-            if dzien_tygodnia in dni_tyg:
-                tasks = todo.zadanie_wedlug_dnia(dzien_tygodnia)
-                if tasks:
-                    for task in tasks:
-                        print(f"ID: {task.task_id}, Tytuł: {task.tytul}, Termin wykonania: {task.dzien_tygodnia}")
+        return True
+    
+    elif choice == 2:
+        dzien_tygodnia = input("Podaj dzień tygodnia, z którego chcesz wyświetlić zadania: ").lower()
+        if dzien_tygodnia in dni_tyg:
+            tasks = todoInstancja.zadanie_wedlug_dnia(dzien_tygodnia)
+            if tasks:
+                for task in tasks:
+                    print(f"ID: {task.task_id}, Tytuł: {task.tytul}, Termin wykonania: {task.dzien_tygodnia}")
+            else:
+                print("Brak zadań na podany dzień tygodnia.")
+        else:
+            print("Podano nieprawidłowy dzień tygodnia")
+        return True
+    
+    elif choice == 3:
+        all_tasks = todoInstancja.get_all_tasks()
+        flaga = True if input("Wyświetlić opis zadania? y/n ") == 'y' else False 
+        if all_tasks:
+            for task in all_tasks:
+                if(flaga):
+                    print(f"ID: {task.task_id}, Opis: {task.opis}, Tytuł: {task.tytul}, Termin wykonania: {task.dzien_tygodnia}")
                 else:
-                    print("Brak zadań na podany dzień tygodnia.")
-            else:
-                print("Podano nieprawidłowy dzień tygodnia")
+                    print(f"ID: {task.task_id}, Tytuł: {task.tytul}, Termin wykonania: {task.dzien_tygodnia}")
+        else:
+            print("Brak zapisanych zadań.")
+        return True
 
-        elif choice == "3":
-            all_tasks = todo.get_all_tasks()
-            flaga = True if input("Wyświetlić opis zadania? y/n ") == 'y' else False 
-            if all_tasks:
-                for task in all_tasks:
-                    if(flaga):
-                        print(f"ID: {task.task_id}, Opis: {task.opis}, Tytuł: {task.tytul}, Termin wykonania: {task.dzien_tygodnia}")
-                    else:
-                        print(f"ID: {task.task_id}, Tytuł: {task.tytul}, Termin wykonania: {task.dzien_tygodnia}")
-            else:
-                print("Brak zapisanych zadań.")
-
-        elif choice == "4":
+    elif choice == 4:
+        if(len(todoInstancja.tasks) != 0):
             task_id = int(input("Podaj ID zadania do usunięcia: "))
-            todo.usun_task(task_id)
+            todoInstancja.usun_task(task_id)
+        else:
+            print("Brak zadań do usunięcia")
+        
+        return True    
 
-        elif choice == "5":
+    elif choice == 5:
+        
+        if(len(todoInstancja.tasks) != 0):
             task_id = int(input("Podaj ID zadania do aktualizacji: "))
             new_tytul = input("Podaj nowy tytuł (opcjonalnie): ")
             new_opis = input("Podaj nowy opis (opcjonalnie): ")
             new_dzien_tygodnia = input("Podaj nowy dzień tygodnia (opcjonalnie): ").lower()
-            if new_dzien_tygodnia in dni_tyg:
-                todo.update_task(task_id, new_tytul, new_opis, new_dzien_tygodnia)
-                print("Zadanie zaktualizowane.")
-            else:
-                print("Niepoprawny dzień tygodnia")
+            
+            if new_dzien_tygodnia:    
                 
-        elif choice == "6":
-            filename = input("Podaj nazwę pliku do zapisu: ")
-            todo.save_to_file(filename)
-            print("Zadania zapisane do pliku.")
-
-        elif choice == "7":
-            break
-
+                if new_dzien_tygodnia in dni_tyg:
+                    todoInstancja.update_task(task_id, new_tytul, new_opis, new_dzien_tygodnia)
+                    print("Zadanie zaktualizowane.")
+                    return True
+                
+                elif new_dzien_tygodnia not in dni_tyg:
+                    print("Niepoprawny dzień tygodnia")
+                    return True
+                
+            todoInstancja.update_task(task_id, new_tytul, new_opis)
+            print("Zadanie zaktualizowane.")
+            return True
+        
         else:
-            print("Nieprawidłowa opcja. Spróbuj ponownie.")
+            print("Brak zadań do aktualizacji")
+            return True
+        
+    elif choice == 6:
+        filename = 'zadania.json'
+        todoInstancja.save_to_file(filename)
+        print("Zadania zapisane do pliku.")
+        return True
 
+    elif choice == 7:
+        return False
+
+    else:
+        print("Nieprawidłowa opcja. Spróbuj ponownie.")
+        return True
+
+def main():
+    flag = True
+    todo = TodoList()
+    todo.load_from_file('zadania.json')
+    while flag:
+        print_menu()
+        try:
+            choice = int(input("Wybierz opcję: "))
+        except ValueError:
+            print("Niepoprawny wybór")
+            continue
+        flag = wybor_fukcjonalnosci(choice, todo)
+        
     print("System autodestrukcji został aktywowany!")
 
 main()

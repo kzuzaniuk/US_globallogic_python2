@@ -18,6 +18,7 @@ while True:
         # still_going = False
         if input("Chcesz zagrać jeszcze raz? Odpowiedz y/n ") == 'y':
             liczba_losowa = random.randint(0, 100)
+            liczba_strzalow = 0
             continue
         else:
             print("Koniec gry")
